@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Card Game</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #141e30, #243b55);
+            color: white;
+            text-align: center;
+        }
+
+        h1 {
+            margin: 20px 0 5px;
+        }
+
+        .info {
+            font-size: 18px;
+            margin: 15px;
+        }
+
+        #game {
+            width: 420px;
+            margin: 20px auto;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        .card {
+            height: 90px;
+            background: #00b4d8;
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 35px;
+            cursor: pointer;
+            transform: rotateY(0deg);
+            transition: 0.3s;
+        }
+
+        .card:hover {
+            transform: scale(1.05);
+        }
+
+        .card.open {
+            background: white;
+        }
+
+        .card.matched {
+            background: #4caf50;
+            cursor: default;
+        }
+
+        button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            background: #00e5ff;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: white;
+        }
+
+        @media (max-width: 500px) {
+            #game {
+                width: 90%;
+            }
+
+            .card {
+                height: 70px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>🧠 MEMORY CARD</h1>
+
+    <div class="info">
+        Pasangan ditemukan:
+        <b><span id="score">0</span></b>
+        / 8
+    </div>
+
+    <button onclick="mulaiGame()">🔄 Game Baru</button>
+
+    <div id="game"></div>
+
+    <p>Cari semua pasangan kartu yang sama!</p>
+
+    <script>
+
+        const game = document.getElementById("game");
+        const scoreText = document.getElementById("score");
+
+        const emojis = [
+            "🚀", "🚀",
+            "🎮", "🎮",
+            "⚽", "⚽",
+            "🎧", "🎧",
+            "🔥", "🔥",
+            "⭐", "⭐",
+            "🍕", "🍕",
+            "🐱", "🐱"
+        ];
+
+        let kartuTerbuka = [];
+        let pasangan = 0;
+        let sedangMemeriksa = false;
+
+        // Mengacak kartu
+        function acak(array) {
+
+            return array.sort(() => Math.random() - 0.5);
+
+        }
+
+        // Memulai game
+        function mulaiGame() {
+
+            game.innerHTML = "";
+
+            pasangan = 0;
+
+            scoreText.textContent = pasangan;
+
+            kartuTerbuka = [];
+
+            sedangMemeriksa = false;
+
+            const kartuAcak = acak([...emojis]);
+
+            kartuAcak.forEach(function(emoji) {
+
+                const kartu = document.createElement("div");
+
+                kartu.className = "card";
+
+                kartu.dataset.emoji = emoji;
+
+                kartu.textContent = "❓";
+
+                kartu.addEventListener("click", function() {
+
+                    bukaKartu(kartu);
+
+                });
+
+                game.appendChild(kartu);
+
+            });
+        }
+
+        // Membuka kartu
+        function bukaKartu(kartu) {
+
+            if (sedangMemeriksa) return;
+
+            if (kartu.classList.contains("open")) return;
+
+            if (kartu.classList.contains("matched")) return;
+
+            kartu.classList.add("open");
+
+            kartu.textContent = kartu.dataset.emoji;
+
+            kartuTerbuka.push(kartu);
+
+            // Jika dua kartu sudah terbuka
+            if (kartuTerbuka.length === 2) {
+
+                cekPasangan();
+
+            }
+        }
+
+        // Mengecek pasangan
+        function cekPasangan() {
+
+            sedangMemeriksa = true;
+
+            const kartu1 = kartuTerbuka[0];
+            const kartu2 = kartuTerbuka[1];
+
+            if (
+                kartu1.dataset.emoji ===
+                kartu2.dataset.emoji
+            ) {
+
+                kartu1.classList.add("matched");
+                kartu2.classList.add("matched");
+
+                pasangan++;
+
+                scoreText.textContent = pasangan;
+
+                kartuTerbuka = [];
+
+                sedangMemeriksa = false;
+
+                // Menang
+                if (pasangan === 8) {
+
+                    setTimeout(function() {
+
+                        alert(
+                            "🎉 SELAMAT!\n\n" +
+                            "Semua pasangan berhasil ditemukan!"
+                        );
+
+                    }, 300);
+                }
+
+            } else {
+
+                setTimeout(function() {
+
+                    kartu1.classList.remove("open");
+                    kartu2.classList.remove("open");
+
+                    kartu1.textContent = "❓";
+                    kartu2.textContent = "❓";
+
+                    kartuTerbuka = [];
+
+                    sedangMemeriksa = false;
+
+                }, 800);
+            }
+        }
+
+        // Jalankan game
+        mulaiGame();
+
+    </script>
+
+</body>
+</html>
